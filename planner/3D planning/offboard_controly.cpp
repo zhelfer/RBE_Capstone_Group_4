@@ -151,7 +151,8 @@ void OffboardControl::publish_trajectory_setpoint()
 	TrajectorySetpoint msg{};
 	global y
 	global z
-	if y < 250:
+	y_max = 300
+	if y < y_max:
 		y = y + 1
 	else:
 		break
