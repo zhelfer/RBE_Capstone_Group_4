@@ -1,14 +1,20 @@
-from pycdr import Client
-from pycdr.transport.udp import UDPv4Transport
+import socket
+import struct
+
+# Define the message type structure
+class Waypoint:
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+
+# Function to serialize the message
+def serialize_waypoint(waypoint):
+    return struct.pack('<fff', waypoint.x, waypoint.y, waypoint.z)
 
 def send_lawnmower_path(width, length, altitude, spacing):
-    # Connect to Micro XRCE Agent
-    client = Client(transport=UDPv4Transport('0.0.0.0', 888))
-
-    # Create a Publisher for the waypoints
-    publisher = client.create_publisher(
-        'lawnmower_waypoints_topic',
-        'lawnmower_waypoints_Type')
+    # Create UDP socket to connect to Micro XRCE Agent
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     waypoints = []
 
@@ -17,24 +23,17 @@ def send_lawnmower_path(width, length, altitude, spacing):
         # Alternate the direction of the path
         if x % 2 == 0:
             for y in range(0, int(width / spacing)):
-                waypoint = {
-                    "x": x * spacing,
-                    "y": y * spacing,
-                    "z": altitude
-                }
+                waypoint = Waypoint(x * spacing, y * spacing, altitude)
                 waypoints.append(waypoint)
         else:
             for y in range(int(width / spacing) - 1, -1, -1):
-                waypoint = {
-                    "x": x * spacing,
-                    "y": y * spacing,
-                    "z": altitude
-                }
+                waypoint = Waypoint(x * spacing, y * spacing, altitude)
                 waypoints.append(waypoint)
 
-    # Send waypoints to the UAV
+    # Serialize and send waypoints to the Micro XRCE Agent
     for waypoint in waypoints:
-        publisher.write(waypoint)
+        serialized_waypoint = serialize_waypoint(waypoint)
+        sock.sendto(serialized_waypoint, ('localhost', 888))  # Replace with appropriate address and port
 
 # Example inputs
 lawnmower_width = 100.0  # Width of the area to cover
@@ -42,5 +41,5 @@ lawnmower_length = 200.0  # Length of the area to cover
 lawnmower_altitude = 50.0  # Altitude for the UAV
 lawnmower_spacing = 10.0  # Spacing between waypoints
 
-# Send lawnmower path to the UAV
+# Send lawnmower path to the UAV via Micro XRCE Agent
 send_lawnmower_path(lawnmower_width, lawnmower_length, lawnmower_altitude, lawnmower_spacing)
