@@ -1,1 +1,25 @@
 
+max_x = 10
+max_y = 10
+z = 10
+# Initialize variables
+lawnmower_coordinates = []
+x = 0
+x2 = x
+y = 0
+y2 = y
+
+
+while x < max_x:
+    y = 0
+    if x % 2 == 0:  #even
+        while y < max_y:
+            lawnmower_coordinates.append((float(x), float(y), float(z)))
+            y = y + 1
+    else:  #odd
+        y = max_y - 1
+        while y >= 0:
+            lawnmower_coordinates.append((float(x), float(y), float(z)))
+            y = y- 1
+    x = x + 1
+print(lawnmower_coordinates)
