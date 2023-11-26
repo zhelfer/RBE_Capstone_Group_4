@@ -1,0 +1,43 @@
+import time
+from pymavlink import mavutil
+
+def send_lawnmower_path(width, length, altitude, spacing):
+    master = mavutil.mavlink_connection('udpin:0.0.0.0:14550')  # Replace with your connection string
+
+    waypoints = []
+    
+    # Generate the pattern along the width
+    for x in range(0, int(length / spacing)):
+        # Alternate the direction of the path
+        if x % 2 == 0:
+            for y in range(0, int(width / spacing)):
+                waypoint = (x * spacing, y * spacing, altitude)
+                waypoints.append(waypoint)
+        else:
+            for y in range(int(width / spacing) - 1, -1, -1):
+                waypoint = (x * spacing, y * spacing, altitude)
+                waypoints.append(waypoint)
+
+    # Send waypoints to the UAV
+    seq = 1
+    for waypoint in waypoints:
+        msg = master.mav.mission_item_send(
+            master.target_system,
+            master.target_component,
+            seq,
+            mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
+            mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,
+            0, 0, 0, 0, 0, 0,
+            waypoint[0], waypoint[1], waypoint[2]
+        )
+        seq += 1
+        time.sleep(1)  # Adjust the delay as needed
+
+# Example inputs
+lawnmower_width = 100.0  # Width of the area to cover
+lawnmower_length = 200.0  # Length of the area to cover
+lawnmower_altitude = 50.0  # Altitude for the UAV
+lawnmower_spacing = 10.0  # Spacing between waypoints
+
+# Send lawnmower path to the UAV
+send_lawnmower_path(lawnmower_width, lawnmower_length, lawnmower_altitude, lawnmower_spacing)
