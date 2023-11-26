@@ -1,0 +1,46 @@
+from pycdr import Client
+from pycdr.transport.udp import UDPv4Transport
+
+def send_lawnmower_path(width, length, altitude, spacing):
+    # Connect to Micro XRCE Agent
+    client = Client(transport=UDPv4Transport('0.0.0.0', 888))
+
+    # Create a Publisher for the waypoints
+    publisher = client.create_publisher(
+        'lawnmower_waypoints_topic',
+        'lawnmower_waypoints_Type')
+
+    waypoints = []
+
+    # Generate the pattern along the width
+    for x in range(0, int(length / spacing)):
+        # Alternate the direction of the path
+        if x % 2 == 0:
+            for y in range(0, int(width / spacing)):
+                waypoint = {
+                    "x": x * spacing,
+                    "y": y * spacing,
+                    "z": altitude
+                }
+                waypoints.append(waypoint)
+        else:
+            for y in range(int(width / spacing) - 1, -1, -1):
+                waypoint = {
+                    "x": x * spacing,
+                    "y": y * spacing,
+                    "z": altitude
+                }
+                waypoints.append(waypoint)
+
+    # Send waypoints to the UAV
+    for waypoint in waypoints:
+        publisher.write(waypoint)
+
+# Example inputs
+lawnmower_width = 100.0  # Width of the area to cover
+lawnmower_length = 200.0  # Length of the area to cover
+lawnmower_altitude = 50.0  # Altitude for the UAV
+lawnmower_spacing = 10.0  # Spacing between waypoints
+
+# Send lawnmower path to the UAV
+send_lawnmower_path(lawnmower_width, lawnmower_length, lawnmower_altitude, lawnmower_spacing)
