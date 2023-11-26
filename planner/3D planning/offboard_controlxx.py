@@ -17,13 +17,13 @@ class OffboardControl(Node):
             history=HistoryPolicy.KEEP_LAST,
             depth=1
         )
-        max_x = 10 # grid search areasize 
-        max_y = 10 # grid search area size
-        z = 10 # altitude height
+        max_x = 10 #grid search area size 
+        max_y = 10 #grid search area size
+        z = 10 #altitude height
         lawnmower_coordinates = [] # empty list for waypoints
         x = 0
         y = 0
-        while x < max_x:
+        while x < max_x: #modified lawnmower loop from 2D
             y = 0
             if x % 2 == 0:  #even
             	while y < max_y:
