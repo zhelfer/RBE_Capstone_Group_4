@@ -1,88 +1,38 @@
-#include <iostream>
-#include <chrono>
-#include <thread>
-#include <fastrtps/Domain.h>
-#include <fastrtps/publisher/Publisher.h>
-#include <fastrtps/participant/Participant.h>
-#include <fastrtps/subscriber/Subscriber.h>
-#include <fastrtps/attributes/PublisherAttributes.h>
-#include <fastrtps/attributes/SubscriberAttributes.h>
-#include <fastrtps/transport/UDPv4TransportDescriptor.h>
-#include <fastrtps/utils/eClock.h>
+class OffboardControl(Node):
+    # ... (other code remains the same)
 
-using namespace eprosima::fastrtps;
-using namespace eprosima::fastrtps::rtps;
+    def __init__(self) -> None:
+        # ... (other code remains the same)
+        self.lawnmower_pattern = [
+            (0.0, 0.0, -5.0),  # Starting position
+            (5.0, 0.0, -5.0),  # Move right
+            (5.0, 5.0, -5.0),  # Move up
+            (0.0, 5.0, -5.0),  # Move left
+            (0.0, 10.0, -5.0),  # Move up
+            (5.0, 10.0, -5.0),  # Move right
+            # ... and so on, add more points for the pattern as needed
+        ]
+        self.lawnmower_index = 0
 
-// Define the message type
-class Waypoint
-{
-public:
-    float x;
-    float y;
-    float z;
-};
+        # ... (other code remains the same)
 
-// Function to create lawnmower pattern waypoints
-std::vector<Waypoint> createLawnmowerPattern(float width, float length, float altitude, float spacing)
-{
-    std::vector<Waypoint> waypoints;
+    def timer_callback(self) -> None:
+        """Callback function for the timer."""
+        self.publish_offboard_control_heartbeat_signal()
 
-    // Generate the pattern along the width
-    for (float x = 0; x < length; x += spacing)
-    {
-        // Alternate the direction of the path
-        if (((int)(x / spacing)) % 2 == 0)
-        {
-            for (float y = 0; y < width; y += spacing)
-            {
-                Waypoint wp = {x, y, altitude};
-                waypoints.push_back(wp);
-            }
-        }
-        else
-        {
-            for (float y = width - spacing; y >= 0; y -= spacing)
-            {
-                Waypoint wp = {x, y, altitude};
-                waypoints.push_back(wp);
-            }
-        }
-    }
+        if self.offboard_setpoint_counter == 10:
+            self.engage_offboard_mode()
+            self.arm()
 
-    return waypoints;
-}
+        if self.vehicle_local_position.z > self.takeoff_height and self.vehicle_status.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD:
+            if self.lawnmower_index < len(self.lawnmower_pattern):
+                x, y, z = self.lawnmower_pattern[self.lawnmower_index]
+                self.publish_position_setpoint(x, y, z)
+                self.lawnmower_index += 1
 
-int main()
-{
-    // Create a Participant
-    ParticipantAttributes pParam;
-    pParam.rtps.builtin.domainId = 0;
-    Domain::createParticipant(pParam);
+        elif self.vehicle_local_position.z <= self.takeoff_height:
+            self.land()
+            exit(0)
 
-    // Create a Publisher
-    PublisherAttributes pubAtt;
-    pubAtt.topic.topicDataType = "Waypoint";
-    pubAtt.topic.topicKind = NO_KEY;
-    pubAtt.topic.topicName = "lawnmower_waypoints";
-    pubAtt.qos.m_reliability.kind = RELIABLE_RELIABILITY_QOS;
-
-    std::shared_ptr<Publisher> pub = Domain::createPublisher(pubAtt);
-
-    // Create lawnmower pattern waypoints
-    float lawnmower_width = 100.0;
-    float lawnmower_length = 200.0;
-    float lawnmower_altitude = 5.0;
-    float lawnmower_spacing = 5.0;
-
-    std::vector<Waypoint> waypoints = createLawnmowerPattern(lawnmower_width, lawnmower_length, lawnmower_altitude, lawnmower_spacing);
-
-    // Publish lawnmower path to the UAV via Micro XRCE Agent
-    for (const auto &wp : waypoints)
-    {
-        pub->write((void *)&wp);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Adjust delay between waypoints
-    }
-
-    Domain::stopAll();
-    return 0;
-}
+        if self.offboard_setpoint_counter < 11:
+            self.offboard_setpoint_counter += 1
