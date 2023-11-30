@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="ground_plane">
+    <static>false</static>
+    <link name="ground_plane">
+      <collision name="heightmap_collision">
+        <geometry>
+          <heightmap>
+            <uri>materials/textures/heightmap.png</uri>
+            <size>30 30 0</size>
+            <pos>0 0 0</pos>
+          </heightmap>
+        </geometry>
+      </collision>
+      <visual name="heightmap_visual">
+        <geometry>
+          <heightmap>
+            <use_terrain_paging>true</use_terrain_paging>
+            <texture>
+              <diffuse>materials/textures/forest-floor31_Albedo.jpg</diffuse>
+              <normal>materials/textures/forest-floor31_Normal.png</normal>
+              <size>5</size>
+            </texture>
+            <uri>materials/textures/heightmap.png</uri>
+            <size>30 30 0</size>
+            <pos>0 0 0</pos>
+          </heightmap>
+        </geometry>     
+      </visual>
+    </link>
+
+    <include>
+      <name>Oak0</name>
+      <pose>0 0 0 0 0 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak tree</uri>
+    </include>
+
+    <include>
+      <name>Oak1</name>
+      <pose>5 5 0 0 0 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak tree</uri>
+    </include>
+
+    <include>
+      <name>Oak2</name>
+      <pose>-5 5 0 0 0 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak tree</uri>
+    </include>
+
+    <include>
+      <name>Oak3</name>
+      <pose>-6 -6 0 0 0 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak tree</uri>
+    </include>
+
+    <include>
+      <name>Oak4</name>
+      <pose>4 -7 0 0 0 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak tree</uri>
+    </include>
+
+    <include>
+      <name>Female1</name>
+      <pose>3 4 0 0 0 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Casual female</uri>
+    </include>
+
+    <include>
+      <name>Male1</name>
+      <pose>-7 2 0 0 0 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Standing person</uri>
+    </include>
+  </model>
+</sdf>
